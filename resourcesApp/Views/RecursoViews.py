@@ -9,7 +9,7 @@ from rest_framework.response import Response
 
 from resourcesApp.models import Recurso, Tipo_Recurso, Control_Comentarios
 from resourcesApp.serializer import RecursoSerializer, TipoRecursoSerializer, RecursoComentarioSerializer
-
+from django.shortcuts import render, redirect
 
 @csrf_exempt
 def recursos_list(request):
@@ -26,6 +26,30 @@ def recursos_list(request):
             return JSONResponse(serialized.data, status=status.HTTP_201_CREATED)
         else:
             return JSONResponse(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
+
+class Principal():
+    def getTipoRecurso(self):
+        return TipoRecurso.getTipoRecurso(self);
+
+    def getComentarios(self):
+        return TipoRecurso.getComentarios(self);
+
+class TipoRecurso(viewsets.ModelViewSet):
+    def getTipoRecurso(request):
+        queryset = Tipo_Recurso.objects.all()
+        context = {'tipoRecurso': queryset}
+        return render(request, 'main/tipoRecurso.html', context)
+
+    def getComentarios(request):
+        queryset = Control_Comentarios.objects.all()
+        context = {'comentarios': queryset}
+        return render(request, 'main/comentarios.html', context)
+
+class Comentarios(generics.ListAPIView):
+    def getComentarios(request):
+        queryset = Control_Comentarios.objects.all()
+        context = {'comentarios': queryset}
+        return render(request, 'main/comentarios.html', context)
 
 
 class RecursoViewSet(generics.ListAPIView):
@@ -44,8 +68,16 @@ class RecursoViewSet(generics.ListAPIView):
 
 
 class TipoRecursoViewSet(viewsets.ModelViewSet):
-    queryset = Tipo_Recurso.objects.all()
-    serializer_class = TipoRecursoSerializer
+    def getTipoRecurso(request):
+        queryset = Tipo_Recurso.objects.all()
+        context = {'tipoRecurso': queryset}
+        return render(request, 'main/tipoRecurso.html', context)
+
+class recursos_comentarios(generics.ListAPIView):
+    def getTipoRecurso(request):
+        queryset = Control_Comentarios.objects.all()
+        context = {'comentarios': queryset}
+        return render(request, 'main/comentarios.html', context)
 
 @api_view(['POST'])
 @permission_classes((AllowAny,))
@@ -67,6 +99,11 @@ class JSONResponse(HttpResponse):
         super(JSONResponse, self).__init__(content, **kwargs)
 
 class recursos_comentarios(generics.ListAPIView):
+    def getComentarios(request):
+        queryset = Control_Comentarios.objects.all()
+        context = {'comentarios': queryset}
+        return render(request, 'main/comentarios.html', context)
+
     serializer_class = RecursoComentarioSerializer
     def get_queryset(self):
         queryset = Control_Comentarios.objects.all()
